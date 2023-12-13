@@ -6,18 +6,11 @@
 
 Aiko-Server Projects
 
-[![](https://img.shields.io/badge/Telegram-group-green?style=flat-square)](https://t.me/aikoaikoaikoaiko)
-[![](https://img.shields.io/badge/Telegram-blue?style=flat-square)](https://t.me/Tele_Aiko)
-[![](https://img.shields.io/github/downloads/AikoPanel/Aiko-Server/total.svg?style=flat-square)](https://github.com/AikoPanel/Aiko-Server/releases)
-[![](https://img.shields.io/github/v/release/AikoPanel/Aiko-Server?style=flat-square)](https://github.com/AikoPanel/Aiko-Server/releases)
-[![docker](https://img.shields.io/docker/v/aikocute/aikocutehotme?label=Docker%20image&sort=semver)](https://hub.docker.com/r/aikocute/aikocutehotme)
-[![Go-Report](https://goreportcard.com/badge/github.com/AikoPanel/Aiko-Server?style=flat-square)](https://goreportcard.com/report/github.com/AikoPanel/Aiko-Server)
-
 </div>
 
 # Description of Aiko-Server
 
-Aiko-Server Supports Various Panels (AikoPanel, V2AikoPanel, etc.)
+Aiko-Server Supports Only AikoPanel
 
 An Xray-based back-end framework, supporting V2ay, Trojan, Shadowsocks protocols, extremely easily extensible and supporting multi-panel connection。
 
@@ -75,7 +68,7 @@ This project is for my personal learning, development and maintenance only, I do
 ## Software installation - release
 
 ```
-wget --no-check-certificate -O Aiko-Server.sh https://raw.githubusercontent.com/AikoPanel/Aiko-Server-Script/master/install.sh && bash Aiko-Server.sh
+wget --no-check-certificate -O Aiko-Server.sh https://raw.githubusercontent.com/AikoPanel/AikoServer/master/install.sh && bash Aiko-Server.sh
 ```
 
 ## Aiko-Server Community Support
