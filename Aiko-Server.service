@@ -1,0 +1,20 @@
+[Unit]
+Description=Aiko-Server Service
+After=network.target nss-lookup.target
+Wants=network.target
+
+[Service]
+User=root
+Group=root
+Type=simple
+LimitAS=infinity
+LimitRSS=infinity
+LimitCORE=infinity
+LimitNOFILE=999999
+WorkingDirectory=/usr/local/Aiko-Server/
+ExecStart=/usr/local/Aiko-Server/Aiko-Server --config /etc/Aiko-Server/aiko.yml
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,8 @@
+version: '3'
+services: 
+  aiko-server: 
+    image: aikocute/aikocutehotme:latest
+    volumes:
+      - ./config:/etc/Aiko-Server/
+    restart: always
+    network_mode: host
