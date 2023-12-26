@@ -577,7 +577,7 @@ show_menu() {
         16) generate_x25519 ;;
         17) generate_certificate ;;
         18) generate_config_default ;;
-        19) install_rulelist ;;
+        19) install_rule_list ;;
         *) echo -e "${red}Please enter the correct number [0-16]${plain}" ;;
     esac
 }
@@ -596,7 +596,7 @@ if [[ $# > 0 ]]; then
         "config") config $* ;;
         "generate") generate_config_file ;;
         "defaultconfig") generate_config_default ;;
-        "blockspeedtest") install_rulelist ;;
+        "blockspeedtest") install_rule_list ;;
         "x25519") generate_x25519 ;;
         "cert") generate_certificate ;;
         "install") check_uninstall 0 && install 0 ;;
