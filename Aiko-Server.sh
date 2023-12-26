@@ -468,7 +468,7 @@ install_rule_list() {
         RuleListPath="/etc/Aiko-Server/rulelist"
         mkdir -p /etc/Aiko-Server/  # Create directory if it does not exist
         
-        if wget https://raw.githubusercontent.com/AikoPanel/AikoServer/main/config/rulelist -O "$RuleListPath"; then
+        if wget https://raw.githubusercontent.com/AikoPanel/AikoServer/master/config/rulelist -O "$RuleListPath"; then
             sed -i "s|RuleListPath:.*|RuleListPath: ${RuleListPath}|" "$CONFIG_FILE"
             echo -e "${green}rulelist has been installed!${plain}\n"
         else
