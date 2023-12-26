@@ -27,6 +27,8 @@ else
     echo -e "${red}System version not detected, please contact the script author!${plain}\n" && exit 1
 fi
 
+CONFIG_FILE="/etc/Aiko-Server/aiko.yml"
+
 # os version
 if [[ -f /etc/os-release ]]; then
     os_version=$(awk -F'[= ."]' '/VERSION_ID/{print $3}' /etc/os-release)
@@ -350,108 +352,62 @@ generate_config_file() {
     echo -e "${red}2. The generated configuration file will be saved to /etc/Aiko-Server/aiko.yml${plain}"
     echo -e "${red}3. The original configuration file will be saved to /etc/Aiko-Server/aiko.yml.bak${plain}"
     echo -e "${red}4. TLS is not currently supported${plain}"
-    read -rp "Do you want to continue generating the configuration file? (y/n)" generate_config_file_continue
+    read -rp "Do you want to continue generating the configuration file? (y/n) " generate_config_file_continue
+
     if [[ $generate_config_file_continue =~ "y"|"Y" ]]; then
-        echo -e "${yellow}Please select the PanelType of your server:${plain}"
-        echo -e "${green}1. AikoPanel${plain}"
-        echo -e "${green}2. AikoPanelv2${plain}"
-        echo -e "${green}Default: AikoPanel${plain}"
-        read -rp "Please enter the PanelType (1-7, default 1): " PanelType
-        case "$PanelType" in
-            1 ) PanelType="AikoPanel" ;;
-            2 ) PanelType="AikoPanelv2" ;;
-            * ) PanelType="AikoPanel" ;;
-        esac
-        read -rp "Please enter the domain name of your server: " ApiHost
-        read -rp "Please enter the panel API key: " ApiKey
-        read -rp "Please enter the node ID: " NodeID
-        echo -e "${yellow}Please select the node transport protocol, if not listed then it is not supported:${plain}"
-        echo -e "${green}1. Shadowsocks${plain}"
-        echo -e "${green}2. V2ray${plain}"
-        echo -e "${green}3. Trojan${plain}"
-        read -rp "Please enter the transport protocol (1-3, default 2): " NodeType
-        case "$NodeType" in
-            1 ) NodeType="Shadowsocks" ;;
-            2 ) NodeType="V2ray" ;;
-            3 ) NodeType="Trojan" ;;
-            * ) NodeType="V2ray" ;;
-        esac
-        echo -e "${yellow}Please select the Sniffing is Enable or Disable, Default is Disable :${plain}"
-        echo -e "${green}1. Enable${plain}"
-        echo -e "${green}2. Disable${plain}"
-        read -rp "Please enter the Sniffing (1-2, default 2): " Sniffing
-        case "$Sniffing" in
-            1 ) Sniffing="false" ;;
-            2 ) Sniffing="true" ;;
-            * ) Sniffing="true" ;;
-        esac
+        read -rp "Enter the number of nodes to configure: " num_nodes
+
         cd /etc/Aiko-Server
-        cat <<EOF > /etc/Aiko-Server/aiko.yml
-Log:
-  Level: warning # Log level: none, error, warning, info, debug 
-  AccessPath: # /etc/Aiko-Server/access.Log
-  ErrorPath: # /etc/Aiko-Server/error.log
-DnsConfigPath: # /etc/Aiko-Server/dns.json # Path to dns config, check https://xtls.github.io/config/dns.html for help
-RouteConfigPath: # /etc/Aiko-Server/route.json # Path to route config, check https://xtls.github.io/config/routing.html for help
-InboundConfigPath: # /etc/Aiko-Server/custom_inbound.json # Path to custom inbound config, check https://xtls.github.io/config/inbound.html for help
-OutboundConfigPath: # /etc/Aiko-Server/custom_outbound.json # Path to custom outbound config, check https://xtls.github.io/config/outbound.html for help
-Nodes:
-  - PanelType: "$PanelType" # Panel type: AikoPanel, AikoPanelv2
+        echo "Nodes:" > /etc/Aiko-Server/aiko.yml
+
+        for (( i=1; i<=num_nodes; i++ )); do
+            echo "Configuring Node $i..."
+            read -rp "Please enter the domain name of your server: " ApiHost
+            read -rp "Please enter the panel API key: " ApiKey
+            read -rp "Please enter the node ID: " NodeID
+
+            echo -e "${yellow}Please select the node transport protocol, if not listed then it is not supported:${plain}"
+            echo -e "${green}1. Shadowsocks${plain}"
+            echo -e "${green}2. V2ray${plain}"
+            echo -e "${green}3. Trojan${plain}"
+            echo -e "${green}4. Vless${plain}"
+            read -rp "Please enter the transport protocol (1-4, default 2): " NodeType
+            case "$NodeType" in
+                1 ) NodeType="Shadowsocks"; DisableLocalREALITYConfig="false"; EnableVless="false"; EnableREALITY="false" ;;
+                2 ) NodeType="V2ray"; DisableLocalREALITYConfig="false"; EnableVless="false"; EnableREALITY="false" ;;
+                3 ) NodeType="Trojan"; DisableLocalREALITYConfig="false"; EnableVless="false"; EnableREALITY="false" ;;
+                4 ) NodeType="Vless"; DisableLocalREALITYConfig="true"; EnableVless="true"; EnableREALITY="true" ;;
+                * ) NodeType="V2ray"; DisableLocalREALITYConfig="false"; EnableVless="false"; EnableREALITY="false" ;;
+            esac
+
+            cat <<EOF >> /etc/Aiko-Server/aiko.yml
+  - PanelType: "AikoPanel"
     ApiConfig:
       ApiHost: "${ApiHost}"
       ApiKey: "${ApiKey}"
       NodeID: ${NodeID}
-      NodeType: ${NodeType} # Node type: V2ray, Shadowsocks, Trojan, Shadowsocks-Plugin
-      Timeout: 30 # Timeout for the api request
-      EnableVless: false # Enable Vless for V2ray Type
-      VlessFlow: "xtls-rprx-vision" # Only support vless
-      SpeedLimit: 0 # Mbps, Local settings will replace remote settings, 0 means disable
-      DeviceLimit: 0 # Local settings will replace remote settings, 0 means disable
-      RuleListPath: # /etc/Aiko-Server/rulelist Path to local rulelist file
+      NodeType: ${NodeType}
+      Timeout: 30
+      EnableVless: ${EnableVless}
+      RuleListPath:
     ControllerConfig:
-      ListenIP: 0.0.0.0 # IP address you want to listen
-      SendIP: 0.0.0.0 # IP address you want to send pacakage
-      UpdatePeriodic: 60 # Time to update the nodeinfo, how many sec.
-      EnableDNS: false # Use custom DNS config, Please ensure that you set the dns.json well
-      DNSType: AsIs # AsIs, UseIP, UseIPv4, UseIPv6, DNS strategy
-      EnableProxyProtocol: false # Only works for WebSocket and TCP
-      DisableSniffing: ${Sniffing} # Disable sniffing
-      DeviceOnlineMinTraffic: 100 # Ngưỡng thống kê để giới hạn số lượng thiết bị trên bảng AikoPanel. Khi lưu lượng truy cập lớn hơn giới hạn này, số lượng thiết bị trực tuyến sẽ được báo cáo. Đơn vị là kB. Nếu không điền vào, nó sẽ được báo cáo theo mặc định.
-      DynamicSpeedConfig:
-        Limit: 0 # Warned speed. Set to 0 to disable AutoSpeedLimit (mbps)
-        WarnTimes: 0 # After (WarnTimes) consecutive warnings, the user will be limited. Set to 0 to punish overspeed user immediately.
-        LimitSpeed: 0 # The speedlimit of a limited user (unit: mbps)
-        LimitDuration: 0 # How many minutes will the limiting last (unit: minute)
-      EnableREALITY: false # Enable REALITY
+      EnableProxyProtocol: false
+      DisableLocalREALITYConfig: ${DisableLocalREALITYConfig}
+      EnableREALITY: ${EnableREALITY}
       REALITYConfigs:
-        Show: true # Show REALITY debug
-        Dest: www.smzdm.com:443 # Required, Same as fallback
-        ProxyProtocolVer: 0 # Send PROXY protocol version, 0 for disable
-        ServerNames: # Required, list of available serverNames for the client, * wildcard is not supported at the moment.
-          - www.smzdm.com
-        PrivateKey: YOUR_PRIVATE_KEY # Required, execute './aiko-server x25519' to generate.
-        MinClientVer: # Optional, minimum version of Xray client, format is x.y.z.
-        MaxClientVer: # Optional, maximum version of Xray client, format is x.y.z.
-        MaxTimeDiff: 0 # Optional, maximum allowed time difference, unit is in milliseconds.
-        ShortIds: # Required, list of available shortIds for the client, can be used to differentiate between different clients.
-          - ""
-          - 0123456789abcdef
+        Show: true
       CertConfig:
-        CertMode: dns # Option about how to get certificate: none, file, http, tls, dns. Choose "none" will forcedly disable the tls config.
-        CertDomain: "node1.test.com" # Domain to cert
-        CertFile: /etc/Aiko-Server/cert/aiko_server.cert # Provided if the CertMode is file
+        CertMode: none
+        CertFile: /etc/Aiko-Server/cert/aiko_server.cert
         KeyFile: /etc/Aiko-Server/cert/aiko_server.key
-        Provider: alidns # DNS cert provider, Get the full support list here: https://go-acme.github.io/lego/dns/
-        Email: test@me.com
-        DNSEnv: # DNS ENV option used by DNS provider
-          CLOUDFLARE_EMAIL: aaa
-          CLOUDFLARE_API_KEY: bbb
 EOF
+        done
     else
         echo -e "${red}Aiko-Server configuration file generation cancelled${plain}"
         before_show_menu
     fi
 }
+
 
 generate_x25519(){
     echo "Aiko-Server will automatically attempt to restart after generating the key pair"
@@ -506,8 +462,25 @@ generate_config_default(){
     fi
 }
 
-install_rulelist(){
-    sed -i "s|RuleListPath:.*|RuleListPath: /etc/Aiko-Server/rulelist|" /etc/Aiko-Server/aiko.yml
+install_rule_list() {
+    read -p "Do you want to install rulelist? [y/n] " answer_1
+    if [[ "$answer_1" == "y" ]]; then
+        RuleListPath="/etc/Aiko-Server/rulelist"
+        mkdir -p /etc/Aiko-Server/  # Create directory if it does not exist
+        
+        if wget https://raw.githubusercontent.com/AikoPanel/AikoServer/main/config/rulelist -O "$RuleListPath"; then
+            sed -i "s|RuleListPath:.*|RuleListPath: ${RuleListPath}|" "$CONFIG_FILE"
+            echo -e "${green}rulelist has been installed!${plain}\n"
+        else
+            echo -e "${red}Failed to download rulelist. Please check your internet connection or try again later.${plain}\n"
+        fi
+    elif [[ "$answer_1" == "n" ]]; then
+        echo -e "${green}[rulelist]${plain} Not installed"
+    else
+        echo -e "${yellow}Warning:${plain} Invalid selection. Please choose 'y' for yes or 'n' for no."
+        install_rule_list  # Recursive call to ask again
+    fi
+    show_menu
 }
 
 # Open firewall ports
