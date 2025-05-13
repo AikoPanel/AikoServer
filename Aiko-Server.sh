@@ -391,6 +391,7 @@ generate_config_file() {
       EnableVless: ${EnableVless}
       RuleListPath:
     ControllerConfig:
+      DeviceOnlineMinTraffic: 100
       EnableProxyProtocol: false
       DisableLocalREALITYConfig: ${DisableLocalREALITYConfig}
       EnableREALITY: ${EnableREALITY}
