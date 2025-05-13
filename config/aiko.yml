@@ -9,6 +9,7 @@ Nodes:
       EnableVless: false # Enable Vless for V2ray Type
       RuleListPath: # /etc/Aiko-Server/rulelist Path to local rulelist file
     ControllerConfig:
+      DeviceOnlineMinTraffic: 100
       EnableProxyProtocol: false
       DisableLocalREALITYConfig: false
       EnableREALITY: false
